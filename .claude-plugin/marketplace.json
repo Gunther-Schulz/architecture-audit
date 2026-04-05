@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "architecture-audit-marketplace",
+  "description": "Architecture Audit — systematic three-layer procedure for objective architecture review",
+  "owner": {
+    "name": "Gunther Schulz",
+    "email": "noreply@local"
+  },
+  "plugins": [
+    {
+      "name": "architecture-audit",
+      "description": "Systematic architecture audit procedure. Three layers deep-first: structural, boundary, error path. Finds what surface reviews miss.",
+      "source": "./plugin"
+    }
+  ]
+}

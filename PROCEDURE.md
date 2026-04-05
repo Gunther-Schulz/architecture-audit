@@ -1,0 +1,192 @@
+# Architecture Audit Procedure
+
+*A systematic procedure for objective architecture review. Not tied to any specific codebase, technology, or project. Applicable to any software system where correctness matters.*
+
+*Origin: Created after a session where six rounds of "review" failed to catch fundamental problems — error swallowing, missing security, god services, incompatible subsystems. Each round found what the previous should have caught. The procedure exists to make round one find what previously took round six.*
+
+---
+
+## Why audits fail
+
+The default behavior when asked to "review" or "audit":
+
+1. Read the code
+2. Check if it does what the docs say
+3. Look for obvious bugs
+4. Report findings
+
+This finds surface issues. It never finds architectural problems because it never
+questions whether the architecture is right — only whether the implementation
+matches it.
+
+Structural problems are invisible to surface review:
+- A function that silently converts errors to defaults **works correctly** in every test
+- A service that handles 8 responsibilities **compiles and serves requests**
+- Two incompatible pattern systems **both produce correct results** in isolation
+- Missing auth on an endpoint **doesn't cause test failures**
+
+These only manifest under conditions tests don't cover, or as escalating
+maintenance cost. A review that checks "does this code work?" will never find
+them. The review must ask "should this code exist in this form?"
+
+---
+
+## The three layers
+
+Mandatory. Applied in order: deep first, surface last. A finding from a deeper
+layer overrides a shallower one — if the architecture is wrong, individual bugs
+are symptoms, not root causes. Fixing symptoms without fixing structure means
+they recur.
+
+### Layer 1: Structural audit
+
+**Goal:** Is the architecture the right shape, or did it grow into this shape?
+
+**1. Responsibility inventory.** For each component: list what it does. Not what
+it's called — what it actually does. If the list has more than 3 items, the
+component may be accumulating responsibilities. If two components share a
+responsibility, there's duplication.
+
+**2. Growth direction test.** If you added one more feature, where would it go?
+If the answer is "add it to the existing component because it needs the same
+data" — the component is a gravity well. Features accumulate not because they
+belong together but because they share a database. This is how god services form.
+
+**3. Duplication check.** Are there two implementations of the same concept? Two
+pattern matchers, two auth mechanisms, two serialization formats for the same
+data? Each duplication is a potential mismatch. Ask: why do both exist? If the
+answer is "historical" or "slightly different" — one should be eliminated.
+
+**4. Security structure check.** Is security a property of the architecture or of
+individual endpoints? If it's per-endpoint, every new endpoint is a security
+decision someone can get wrong. If it's structural (all writes go through an
+authenticated boundary), security is guaranteed by construction. Check: is there
+a way to add a write endpoint that accidentally skips auth?
+
+**5. Audit trail completeness.** Can you reconstruct every decision from stored
+records alone — without reading the code? Not "an audit log exists" — can you
+answer "why was this specific request approved at this specific time?" If you
+need source code to interpret the trail, it's insufficient.
+
+**6. Failure mode inventory.** For each dependency: what happens when it fails?
+Does the system fail-open, fail-closed, or fail-loud? Is this explicit (chosen
+by design) or implicit (whatever the code happens to do)? Implicit failure modes
+are findings.
+
+**Verification:** For each structural finding, describe: the current shape, why
+it's problematic, what the alternative is, what would break or improve. Findings
+without alternatives are complaints, not analysis.
+
+### Layer 2: Boundary audit
+
+**Goal:** Do components agree on what they exchange?
+
+**1. Name every boundary.** Every interface between components: service-to-service,
+function-to-function, code-to-database, code-to-external-system.
+
+**2. Check agreement.** Does the producer's output match the consumer's expected
+input? Not "do the docs say they match" — does the actual code on both sides
+agree? Check: field names, types, encoding, null handling, error representation.
+
+**3. Check transformation.** If data is transformed at a boundary: is the
+transformation documented, tested end-to-end through real infrastructure (not
+mocked), and traceable?
+
+**4. Check what's NOT there.** What does the consumer need that the producer
+doesn't provide? What does the producer send that the consumer ignores?
+
+**Verification:** For each boundary, point to: producer code, consumer code,
+and a test that verifies actual data crosses correctly. If the test mocks either
+side, it verifies the mock, not the boundary.
+
+### Layer 3: Error path audit
+
+**Goal:** Can this system fail silently?
+
+**1. Trace every error.** For every function that can fail: where does the error
+go? Propagated? Logged? Stored? Swallowed?
+
+**2. Classify:**
+- **Propagated** — caller receives the error and can act. ✓
+- **Handled and recorded** — error caught, policy applied, handling logged. ✓
+- **Swallowed** — error caught, converted to default. Caller can't tell. **Always a finding.**
+
+A swallowed error is a lie to the caller. Not "acceptable for MVP." Not "by
+design." A default where there should be an error means the system can silently
+produce wrong results.
+
+**3. Impact.** If swallowed: what happens downstream? Wrong decision? Incorrect
+output? Skipped security check? Impact determines severity.
+
+**Verification:** For each error path: where it originates, where it's handled,
+what the caller sees. If you can't trace the chain, the path is untested.
+
+---
+
+## What the audit produces
+
+A single document with:
+
+1. **Structural findings** — god components, duplications, decorative security,
+   incomplete audit trails, implicit failure modes.
+
+2. **Boundary findings** — mismatches, untested boundaries, assumptions crossing
+   component boundaries without verification.
+
+3. **Error path findings** — every swallowed error, every untraced path, with
+   severity based on downstream impact.
+
+4. **For each finding:** specific code location, impact if unfixed, classification:
+   bug (fix the code), design gap (fix the design), or architecture problem
+   (fix the structure).
+
+5. **An honest answer to:** "Is this architecture sound, or does it need
+   rethinking?" Not "it's fine for now." Either the architecture supports the
+   requirements or it doesn't.
+
+---
+
+## What the audit must NOT do
+
+- **Accept "tests pass" as evidence.** Tests verify what they test. They don't
+  verify what they don't test.
+
+- **Evaluate code against what it was supposed to do.** Evaluate against what it
+  SHOULD do. If the design says "errors treated as defaults" — the audit should
+  say "that design is wrong."
+
+- **Protect sunk cost.** If the architecture needs rethinking, say so. "We
+  already built it" is not a reason to avoid the finding.
+
+- **List findings without severity.** "Missing auth" and "could improve log
+  message" are not the same. Every finding needs impact.
+
+- **Stop after one pass.** Each pass finds what the previous missed. Two passes
+  minimum. The first finds obvious issues. The second finds structural ones.
+
+---
+
+## The failure pattern this prevents
+
+```
+Round 1: "Looks good, found a few minor issues"
+Round 2: "Found some more issues, mostly naming"
+Round 3: "Actually there are error handling gaps"
+Round 4: "The auth is missing on some endpoints"
+Round 5: "The evaluator silently swallows errors"
+Round 6: "The whole service is a god service and the architecture is brittle"
+```
+
+Each round finds what the previous should have caught. Round 6's finding
+(architecture) is the root cause of rounds 1-5's symptoms. Starting deep
+means the first finding is the most important one, not the last.
+
+---
+
+## When to apply
+
+- Before declaring any significant implementation "done"
+- When the system has grown substantially since the last audit
+- When bugs are found that "should have been caught by review"
+- When asked to review, audit, or assess — this is the minimum standard
+- When the impulse is to say "looks good" — that's the signal to go deeper
