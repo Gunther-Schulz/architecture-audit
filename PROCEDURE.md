@@ -47,7 +47,7 @@ it's called — what it actually does. If the list has more than 3 items, the
 component may be accumulating responsibilities. If two components share a
 responsibility, there's duplication.
 
-**2. Growth direction test.** If you added one more feature, where would it go?
+**2. Growth direction test.** If one more feature were added, where would it go?
 If the answer is "add it to the existing component because it needs the same
 data" — the component is a gravity well. Features accumulate not because they
 belong together but because they share a database. This is how god services form.
@@ -63,7 +63,7 @@ decision someone can get wrong. If it's structural (all writes go through an
 authenticated boundary), security is guaranteed by construction. Check: is there
 a way to add a write endpoint that accidentally skips auth?
 
-**5. Audit trail completeness.** Can you reconstruct every decision from stored
+**5. Audit trail completeness.** Can every decision be reconstructed from stored
 records alone — without reading the code? Not "an audit log exists" — can you
 answer "why was this specific request approved at this specific time?" If you
 need source code to interpret the trail, it's insufficient.
@@ -138,7 +138,7 @@ produce wrong results.
 output? Skipped security check? Impact determines severity.
 
 **Verification:** For each error path: where it originates, where it's handled,
-what the caller sees. If you can't trace the chain, the path is untested.
+what the caller sees. If the chain can't be traced, the path is untested.
 
 **Deepening:** For each finding, trace its implications. An error swallowed in
 one function predicts swallowed errors in similar functions. A fire-and-forget
