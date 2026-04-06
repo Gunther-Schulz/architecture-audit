@@ -9,9 +9,7 @@ license: MIT
 
 ## Load this now
 
-Read `PROCEDURE.md` from the architecture-audit repository. It defines the three mandatory layers applied deep-first.
-
-`OBSERVATIONS.md` documents failure patterns that shaped the procedure. Read it only when improving this skill, not when running an audit.
+Read `PROCEDURE.md` from this skill's directory. It defines the three mandatory layers applied deep-first.
 
 The procedure has three mandatory layers, applied deep-first:
 1. **Structural audit** — is the architecture the right shape?
