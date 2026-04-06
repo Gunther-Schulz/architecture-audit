@@ -85,8 +85,7 @@ missing abstraction in one area predicts missing abstractions in adjacent areas.
 This is not a second pass of the same checks. It is a targeted investigation
 driven by what was already found. Each finding is a lead — follow it until it
 stops producing new findings. Findings from deepening are added to the same
-layer they originated from. See `OBSERVATIONS.md` for documented examples of
-what happens when findings are not followed through.
+layer they originated from.
 
 ### Layer 2: Boundary audit
 
@@ -192,7 +191,6 @@ A single document with:
 - **Treat findings as isolated.** A finding is a lead, not a conclusion. Every
   finding predicts adjacent issues. The deepening step exists because the
   default behavior is to record a finding and move to the next checklist item.
-  See `OBSERVATIONS.md` for documented failure patterns.
 
 ---
 
