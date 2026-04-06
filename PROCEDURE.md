@@ -77,6 +77,18 @@ are findings.
 it's problematic, what the alternative is, what would break or improve. Findings
 without alternatives are complaints, not analysis.
 
+**Deepening:** For each finding, trace its implications. What else must be true
+if this finding exists? What adjacent issues does it predict? Follow the thread:
+
+- Finding: "sessions lack a formal interface" → Where are session contracts
+  defined today? → Found: ad-hoc interface in consumer package → Are there other
+  ad-hoc interfaces? → Found: two more in other consumers.
+
+The deepening step is not a second pass of the same checks. It is a targeted
+investigation driven by what was already found. Each finding is a lead — follow
+it until it stops producing new findings. Findings from deepening are added to
+the same layer they originated from.
+
 ### Layer 2: Boundary audit
 
 **Goal:** Do components agree on what they exchange?
@@ -99,6 +111,18 @@ doesn't provide? What does the producer send that the consumer ignores?
 and a test that verifies actual data crosses correctly. If the test mocks either
 side, it verifies the mock, not the boundary.
 
+**Deepening:** For each finding, trace its implications. A boundary mismatch in
+one place predicts mismatches in similar boundaries. A contract defined in the
+wrong package predicts other misplaced contracts. Follow the thread:
+
+- Finding: "context server calls HITL without auth" → What other service-to-service
+  calls exist? → Do they all authenticate? → Found: another unauthenticated call.
+
+- Finding: "consumer defines its own interface for a domain concept" → What other
+  consumers define ad-hoc interfaces? → Do formal domain interfaces exist that
+  they should use instead? → Found: three consumers each defining subsets of the
+  same domain contract.
+
 ### Layer 3: Error path audit
 
 **Goal:** Can this system fail silently?
@@ -120,6 +144,14 @@ output? Skipped security check? Impact determines severity.
 
 **Verification:** For each error path: where it originates, where it's handled,
 what the caller sees. If you can't trace the chain, the path is untested.
+
+**Deepening:** For each finding, trace its implications. An error swallowed in
+one function predicts swallowed errors in similar functions. A fire-and-forget
+write predicts other fire-and-forget writes. Follow the thread:
+
+- Finding: "grant usage increment error logged but not recorded" → What other
+  post-decision side effects exist? → Do they all record errors? → Found:
+  telegram notification errors also logged-only.
 
 ---
 
@@ -164,9 +196,16 @@ A single document with:
 - **Stop after one pass.** Each pass finds what the previous missed. Two passes
   minimum. The first finds obvious issues. The second finds structural ones.
 
+- **Treat findings as isolated.** A finding is a lead, not a conclusion. If you
+  find "sessions lack a formal interface," the next question is "where are
+  session contracts defined today?" not "noted, moving on." Every finding
+  predicts adjacent issues. Follow the thread.
+
 ---
 
-## The failure pattern this prevents
+## The failure patterns this prevents
+
+**Pattern 1: Shallow-first discovery.**
 
 ```
 Round 1: "Looks good, found a few minor issues"
@@ -180,6 +219,21 @@ Round 6: "The whole service is a god service and the architecture is brittle"
 Each round finds what the previous should have caught. Round 6's finding
 (architecture) is the root cause of rounds 1-5's symptoms. Starting deep
 means the first finding is the most important one, not the last.
+
+**Pattern 2: Findings without follow-through.**
+
+```
+Pass 1: "store.go has 9 responsibilities" (correct finding)
+Pass 2: "sessions lack a formal interface" (correct finding)
+Missed: "handler.go defines its own SessionStore" (implication of finding 2)
+Missed: "pipeline defines its own DecisionWriter" (same pattern)
+Missed: "extauthz defines its own SessionRecorder" (same pattern)
+```
+
+The first two findings were correct. But each finding implies adjacent issues
+that the audit never looked for. The deepening step after each layer exists to
+prevent this: take each finding and ask "what else must be true?" Follow the
+thread until it stops producing new findings.
 
 ---
 
