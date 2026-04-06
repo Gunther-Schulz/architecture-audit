@@ -29,3 +29,13 @@ Start with structure, not surface bugs. If the architecture is wrong, individual
 ## After the audit
 
 Produce a single document with findings organized by layer (structural → boundary → error path). Each finding has: code location, impact, classification (bug / design gap / architecture problem). End with an honest answer: is this architecture sound, or does it need rethinking?
+
+## Skill evolution
+
+When a gap is noticed during an audit — a check that should have caught
+something but didn't, a failure pattern the procedure doesn't cover, a
+technique that produced better results:
+
+1. Write the observation to the improvement journal (OBSERVATIONS.md)
+2. Assess if PROCEDURE.md needs updating based on the observation
+3. Propose the change with reasoning. Do not change without permission.
