@@ -9,7 +9,7 @@ license: MIT
 
 ## Load this now
 
-Read `PROCEDURE.md` from the architecture-audit repository. Follow it.
+Read `PROCEDURE.md` and `OBSERVATIONS.md` from the architecture-audit repository. The procedure defines what to do. The observations document failure patterns — read them to calibrate judgment before starting.
 
 The procedure has three mandatory layers, applied deep-first:
 1. **Structural audit** — is the architecture the right shape?
