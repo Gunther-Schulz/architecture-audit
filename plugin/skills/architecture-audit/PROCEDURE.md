@@ -173,11 +173,12 @@ A single document with:
    (fix the structure).
 
 5. **Fix everything cheap.** After reporting, fix every finding that can be
-   resolved in the current session without architectural change. Do not defer
-   fixes that take minutes. Do not bury low-severity findings or signal they
-   can be ignored. Present all findings with equal clarity. Severity classifies
-   impact, not urgency — a 5-minute fix with low impact is still worth doing now.
-   Defer only what requires out-of-scope structural work.
+   resolved in the current session without architectural change. This includes
+   issues noticed in passing outside the audit scope — offer to fix them. Do
+   not defer fixes that take minutes. Do not bury low-severity findings or
+   signal they can be ignored. Present all findings with equal clarity. Severity
+   classifies impact, not urgency — a 5-minute fix with low impact is still
+   worth doing now. Defer only what requires out-of-scope structural work.
 
 
 6. **An honest answer to:** "Is this architecture sound, or does it need

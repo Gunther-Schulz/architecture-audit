@@ -47,3 +47,24 @@ code, warning field, count of failures, or explicit partial-result marker.
 **Procedure update:** Added "degraded without signal" as a fourth error
 classification in Layer 3, between "handled and recorded" and "swallowed."
 
+---
+
+## Observation 2: Cursory findings get walked past
+
+**Date:** April 2026
+**Context:** Same ingestion pipeline audit. Two error-handling issues
+(dedup failure silent, rule submission failure silent) were noticed during
+the scoped audit of the strategy system. They were cheap fixes — add a
+warning, add a trace field. The audit classified them as "pre-existing,
+out of scope" and moved on.
+
+**What happened:** The "fix everything cheap" rule existed but didn't
+explicitly cover things noticed in passing outside the audit scope. The
+ambiguity allowed inventing a "pre-existing = out of scope" exemption.
+The rule was clear in intent but not in application.
+
+**Procedure update:** Added "this includes issues noticed in passing
+outside the audit scope — offer to fix them" to the fix-everything-cheap
+rule. One sentence. The audit scope doesn't expand; you just don't walk
+past cheap fixes you happened to see.
+
