@@ -128,14 +128,22 @@ go? Propagated? Logged? Stored? Swallowed?
 **2. Classify:**
 - **Propagated** — caller receives the error and can act. ✓
 - **Handled and recorded** — error caught, policy applied, handling logged. ✓
+- **Degraded without signal** — error caught, processing continues with partial
+  output, but the caller cannot distinguish degraded results from complete
+  results. The handling is reasonable (continue past partial failure); the
+  response contract is not (reporting success when something was lost).
+  **Always a finding.** The fix is not to fail — it's to signal: a status
+  that reflects incompleteness, a count of what was lost, a field that says
+  "this result is partial." See observation 1.
 - **Swallowed** — error caught, converted to default. Caller can't tell. **Always a finding.**
 
-A swallowed error is a lie to the caller. Not "acceptable for MVP." Not "by
-design." A default where there should be an error means the system can silently
-produce wrong results.
+A swallowed error is a lie to the caller. A degraded-without-signal result is
+a subtler lie — the error was handled reasonably, but the response pretends
+nothing was lost. Both produce callers that act on incomplete information.
 
-**3. Impact.** If swallowed: what happens downstream? Wrong decision? Incorrect
-output? Skipped security check? Impact determines severity.
+**3. Impact.** If swallowed or degraded-without-signal: what happens downstream?
+Wrong decision? Incorrect output? Skipped security check? Wasted operator time
+investigating why results look different? Impact determines severity.
 
 **Verification:** For each error path: where it originates, where it's handled,
 what the caller sees. If the chain can't be traced, the path is untested.
@@ -157,8 +165,8 @@ A single document with:
 2. **Boundary findings** — mismatches, untested boundaries, assumptions crossing
    component boundaries without verification.
 
-3. **Error path findings** — every swallowed error, every untraced path, with
-   severity based on downstream impact.
+3. **Error path findings** — every swallowed error, every degraded-without-signal
+   result, every untraced path, with severity based on downstream impact.
 
 4. **For each finding:** specific code location, impact if unfixed, classification:
    bug (fix the code), design gap (fix the design), or architecture problem
@@ -170,6 +178,7 @@ A single document with:
    can be ignored. Present all findings with equal clarity. Severity classifies
    impact, not urgency — a 5-minute fix with low impact is still worth doing now.
    Defer only what requires out-of-scope structural work.
+
 
 6. **An honest answer to:** "Is this architecture sound, or does it need
    rethinking?" Not "it's fine for now." Either the architecture supports the
