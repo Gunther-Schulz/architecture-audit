@@ -1,7 +1,7 @@
 ---
 name: architecture-audit
 description: This skill should be used when the user says "audit", "review architecture", "code review", "is this robust?", "check the architecture", "full audit", or asks to evaluate whether the current implementation is sound. Use proactively before declaring significant implementations complete.
-version: 0.1.0
+version: 1.0.0
 license: MIT
 ---
 
@@ -36,6 +36,6 @@ When a gap is noticed during an audit — a check that should have caught
 something but didn't, a failure pattern the procedure doesn't cover, a
 technique that produced better results:
 
-1. Write the observation to the improvement journal (OBSERVATIONS.md)
+1. Write the observation to the improvement journal (`dev-notes/OBSERVATIONS.md` in the source repo)
 2. Assess if PROCEDURE.md needs updating based on the observation
 3. Propose the change with reasoning. Do not change without permission.
