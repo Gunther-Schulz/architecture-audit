@@ -1,7 +1,7 @@
 ---
 name: architecture-audit
 description: This skill should be used when the user says "audit", "review architecture", "code review", "is this robust?", "check the architecture", "full audit", or asks to evaluate whether the current implementation is sound. Use proactively before declaring significant implementations complete.
-version: 1.0.0
+version: 1.0.1
 license: MIT
 ---
 
@@ -9,9 +9,11 @@ license: MIT
 
 ## Load this now
 
-Read `PROCEDURE.md` from this skill's directory. It defines the three mandatory layers applied deep-first.
+- [ ] `PROCEDURE.md` (in this skill's directory) read this session?
+  - NO → CANNOT proceed. Read it now.
+  - YES → Evidence: name it.
 
-The procedure has three mandatory layers, applied deep-first:
+`PROCEDURE.md` defines the three mandatory layers, applied deep-first:
 1. **Structural audit** — is the architecture the right shape?
 2. **Boundary audit** — do components agree on what they exchange?
 3. **Error path audit** — can the system fail silently?

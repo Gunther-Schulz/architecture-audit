@@ -12,7 +12,7 @@ Not tied to any specific codebase, technology, or project. Applicable to any sof
 ## Installation
 
 ```bash
-claude plugin marketplace add architecture-audit-marketplace --source github:Gunther-Schulz/architecture-audit
+claude plugin marketplace add Gunther-Schulz/architecture-audit
 claude plugin install architecture-audit@architecture-audit-marketplace
 ```
 

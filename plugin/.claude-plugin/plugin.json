@@ -1,6 +1,6 @@
 {
   "name": "architecture-audit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Systematic architecture audit — three layers deep-first: structural, boundary, error path",
   "author": {
     "name": "Gunther Schulz"
